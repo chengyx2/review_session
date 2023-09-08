@@ -1,0 +1,58 @@
+---
+title: "Review session 01"
+output: html_document
+date: '2023-09-08'
+---
+
+```{r}
+library(tidyverse)
+library(tidyr)
+# loads the datasets
+loans = read.csv('loans.csv',header = TRUE)
+#loans
+```
+```{r}
+table(is.na(loans))
+```
+
+```{r}
+# use date after 1995-01-01
+(typeof(loans$date))
+loans$date = as.Date(loans$date)
+(typeof(loans$date))
+loans = loans[loans$date > "1995-01-01",]
+#loans
+```
+
+
+
+```{r}
+ret = tail(colnames(loans),-5)
+ret
+
+df <- loans %>% pivot_longer(cols = c(ret), names_to = 'loan_type',values_to = "Values") 
+#df
+# convert the rows that doesn't have loans to Na and the drop them
+df$Values[df$Values == "-"] <- NA
+df = df %>% drop_na(Values)
+#df 
+# one column contains multi variables then we need to seperate them
+df <- df %>% separate(loan_type, c('loan_term','loan_status'), sep = 3)
+#df
+df <- subset(df, select = -c(Values))
+#df
+```
+
+
+
+```{r}
+# change unnecessary words to meaningful strings 
+df$loan_term <- gsub("X","",df$loan_term)
+#df
+df$loan_status <- gsub("_","",df$loan_status)
+#df
+
+#save the data
+write.csv(df,"./loan_r.csv", row.names = FALSE)
+```
+
